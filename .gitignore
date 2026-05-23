@@ -1,0 +1,46 @@
+# 建立 .gitignore
+@'
+# Compiled class files
+*.class
+/target/
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Maven wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
+# 敏感設定檔（含密碼）
+**/application.properties
+**/application.yml
+**/application-dev.properties
+**/application-prod.properties
+**/application-personal.properties
+**/application-customer.properties
+**/bootstrap.properties
+**/launch.json
+
+# 環境變數檔案
+.env
+.env.*
+
+# 其他敏感檔案
+*.p12
+*.key
+'@ | Out-File -FilePath .gitignore -Encoding UTF8
+
+**/target/
