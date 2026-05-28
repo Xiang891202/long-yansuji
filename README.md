@@ -2,31 +2,39 @@
 
 多租戶庫存管理後端系統，支援員工回報庫存、自動計算叫貨清單、安全庫存模板管理等功能。
 
+## ✅ 已完成功能
+
+- ✅ 多租戶隔離（`tenant_id` 整數型態）
+- ✅ 員工登入（身分證 + 生日）→ JWT（權限：`inventory_access`）
+- ✅ 管理員登入（Email + 手機）→ JWT（權限：`admin`）
+- ✅ 商品分類 CRUD（僅管理員可操作）
+- ✅ Spring Security + JWT 過濾器
+- ✅ Flyway 資料庫遷移（Schema 版本管理）
+- ✅ 健康檢查與測試 API
+
+## 🚧 進行中 / 規劃中
+
+- 商品管理（含圖片上傳、價格設定）
+- 安全庫存模板（依星期設定，樂觀鎖）
+- 員工點貨回報與叫貨計算（冪等性）
+- 前後端串接（Vue 3）
+
 ## 技術棧
 
 - Java 17
 - Spring Boot 3.1.5
 - Spring Data JPA
 - PostgreSQL (Supabase)
-- Flyway (資料庫遷移)
-- JWT (身份驗證)
+- Flyway
+- JWT (JJWT)
 - Maven
-
-## 功能模組
-
-- 多租戶隔離 (tenant_id)
-- 員工登入 (身分證 + 生日) 與權限管理
-- 管理員登入 (Email + 手機)
-- 商品分類與商品管理
-- 安全庫存模板 (依星期設定)
-- 員工點貨回報，自動計算補貨清單 (含樂觀鎖與冪等性)
-- 叫貨統計報表
+- Spring Security
 
 ## 環境要求
 
 - JDK 17
 - Maven 3.9+
-- PostgreSQL 資料庫 (建議使用 Supabase)
+- PostgreSQL 資料庫（建議 Supabase）
 
 ## 快速啟動
 
@@ -34,55 +42,58 @@
    ```bash
    git clone https://github.com/Xiang891202/long-yansuji.git
    cd long-yansuji/backend
-設定資料庫連線 (使用環境變數)
 
-建立 application.properties 或使用環境變數：
+2.設定資料庫連線（使用環境變數）
+複製 application.properties.example（若無，請參考下方範例）並設定環境變數：
 
 properties
-spring.datasource.url=jdbc:postgresql://your-db-host:5432/postgres?sslmode=require
-spring.datasource.username=your_db_user
-spring.datasource.password=your_db_password
-app.tenant-id=2
-執行 Flyway 遷移
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/postgres}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD:}
+app.tenant-id=${TENANT_ID:2}
+app.jwt.secret=${JWT_SECRET:your_jwt_secret_here}
 
-Maven 會自動執行 (第一次啟動時)
 
-啟動應用程式
-
-bash
-mvn spring-boot:run
-或使用環境變數啟動 (PowerShell 範例)：
+3.啟動前設定環境變數（PowerShell 範例）
 
 powershell
-$env:DB_URL="jdbc:postgresql://your-host:5432/postgres?sslmode=require"
+$env:DB_URL="jdbc:postgresql://your-db-host:5432/postgres?sslmode=require"
 $env:DB_USER="postgres"
 $env:DB_PASSWORD="your_password"
 $env:TENANT_ID="2"
 mvn spring-boot:run
-測試 API
 
-GET http://localhost:8080/health → OK
 
-GET http://localhost:8080/test/db → Tenant: 2, Employee count: 1
+4.測試 API
+
+健康檢查：GET http://localhost:8080/health → OK
+
+測試資料庫連線：GET http://localhost:8080/test/db → Tenant: 2, Employee count: 1
+
+員工登入：POST http://localhost:8080/auth/employee/login
+
+json
+{ "tenantId": 2, "identityNumber": "B987654321", "birthDate": "1990-01-02" }
+管理員登入：POST http://localhost:8080/auth/admin/login
+
+json
+{ "tenantId": 2, "email": "boss@ysgs.com", "phone": "0987654321" }
 
 資料庫結構
-使用 Flyway 管理，腳本位於 src/main/resources/db/migration/V1__init_schema.sql
+Flyway 腳本：src/main/resources/db/migration/V1__init_schema.sql
+
+租戶範例：id=1 美容專案，id=2 鹽酥雞客戶
+
+測試員工：身分證 B987654321，生日 1990-01-02，權限 ["inventory_access"]
+
+測試管理員：boss@ysgs.com / 0987654321，權限 ["admin"]
 
 注意事項
-敏感資訊：application.properties、application-personal.properties 等檔案請勿提交至 Git (已加入 .gitignore)。
+敏感設定檔（含真實密碼）請勿提交至 Git，已加入 .gitignore。
 
-租戶 ID 型態：資料庫中 tenant_id 為 INTEGER，對應 Java 中的 Integer。
+租戶 ID 在資料庫中為 INTEGER，對應 Java 中的 Integer。
 
-多租戶：所有資料表都包含 tenant_id 欄位，透過 TenantInterceptor 自動注入當前租戶 ID。
-
-後續開發計畫
-員工登入 API (JWT)
-
-管理員後台 (商品、安全庫存管理)
-
-點貨計算核心邏輯 (樂觀鎖 + 冪等性)
-
-前後端串接 (Vue 3)
+多租戶隔離透過 TenantInterceptor 自動注入當前租戶 ID。
 
 授權
 本專案為商業用途，未經授權不得任意散佈。
