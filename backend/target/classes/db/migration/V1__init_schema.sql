@@ -188,3 +188,6 @@ INSERT INTO inv_products (tenant_id, category_id, name, unit, prices, is_active)
 SELECT 2, id, '高麗菜', '份', '[{"label":"一份","price":40}]', true
 FROM inv_categories WHERE tenant_id = 2 AND code = 'vegetable' LIMIT 1
 ON CONFLICT DO NOTHING;
+
+- 若缺少樂觀鎖欄位 version，請執行：
+ALTER TABLE inv_safe_stocks ADD COLUMN IF NOT EXISTS version INT DEFAULT 1;

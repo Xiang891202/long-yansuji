@@ -42,6 +42,7 @@
    ```bash
    git clone https://github.com/Xiang891202/long-yansuji.git
    cd long-yansuji/backend
+   C:\maven\apache-maven-3.9.16\bin\mvn.cmd clean compile
 
 2.設定資料庫連線（使用環境變數）
 複製 application.properties.example（若無，請參考下方範例）並設定環境變數：
