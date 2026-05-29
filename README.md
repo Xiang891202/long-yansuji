@@ -8,16 +8,19 @@
 - ✅ 員工登入（身分證 + 生日）→ JWT（權限：`inventory_access`）
 - ✅ 管理員登入（Email + 手機）→ JWT（權限：`admin`）
 - ✅ 商品分類 CRUD（僅管理員可操作）
+- ✅ 商品管理 CRUD（含圖片欄位、多規格價格 JSONB）
+- ✅ 安全庫存模板（依星期設定，樂觀鎖 `version`）
+- ✅ 員工點貨回報與叫貨計算（冪等性 `Idempotency-Key`）
 - ✅ Spring Security + JWT 過濾器
 - ✅ Flyway 資料庫遷移（Schema 版本管理）
 - ✅ 健康檢查與測試 API
 
 ## 🚧 進行中 / 規劃中
 
-- 商品管理（含圖片上傳、價格設定）
-- 安全庫存模板（依星期設定，樂觀鎖）
-- 員工點貨回報與叫貨計算（冪等性）
 - 前後端串接（Vue 3）
+- 叫貨統計報表（儀表板）
+- 檔案上傳（商品圖片）
+- 人資模組（員工出勤、薪資）
 
 ## 技術棧
 
@@ -42,10 +45,12 @@
    ```bash
    git clone https://github.com/Xiang891202/long-yansuji.git
    cd long-yansuji/backend
-   C:\maven\apache-maven-3.9.16\bin\mvn.cmd clean compile
+編譯專案（使用 Maven 完整路徑，或將 Maven 加入 PATH）
 
-2.設定資料庫連線（使用環境變數）
-複製 application.properties.example（若無，請參考下方範例）並設定環境變數：
+powershell
+C:\maven\apache-maven-3.9.16\bin\mvn.cmd clean compile
+設定資料庫連線（使用環境變數）
+建立 application.properties（已內含佔位符），或直接設定環境變數：
 
 properties
 spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/postgres}
@@ -53,19 +58,16 @@ spring.datasource.username=${DB_USER:postgres}
 spring.datasource.password=${DB_PASSWORD:}
 app.tenant-id=${TENANT_ID:2}
 app.jwt.secret=${JWT_SECRET:your_jwt_secret_here}
-
-
-3.啟動前設定環境變數（PowerShell 範例）
+啟動前設定環境變數（PowerShell 範例）
 
 powershell
 $env:DB_URL="jdbc:postgresql://your-db-host:5432/postgres?sslmode=require"
 $env:DB_USER="postgres"
 $env:DB_PASSWORD="your_password"
 $env:TENANT_ID="2"
-mvn spring-boot:run
+C:\maven\apache-maven-3.9.16\bin\mvn.cmd spring-boot:run
 
-
-4.測試 API
+測試 API
 
 健康檢查：GET http://localhost:8080/health → OK
 
@@ -79,7 +81,6 @@ json
 
 json
 { "tenantId": 2, "email": "boss@ysgs.com", "phone": "0987654321" }
-
 資料庫結構
 Flyway 腳本：src/main/resources/db/migration/V1__init_schema.sql
 
