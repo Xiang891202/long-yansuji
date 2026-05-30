@@ -4,6 +4,7 @@
 
 ## ✅ 已完成功能
 
+### 後端
 - ✅ 多租戶隔離（`tenant_id` 整數型態）
 - ✅ 員工登入（身分證 + 生日）→ JWT（權限：`inventory_access`）
 - ✅ 管理員登入（Email + 手機）→ JWT（權限：`admin`）
@@ -11,15 +12,23 @@
 - ✅ 商品管理 CRUD（含圖片欄位、多規格價格 JSONB）
 - ✅ 安全庫存模板（依星期設定，樂觀鎖 `version`）
 - ✅ 員工點貨回報與叫貨計算（冪等性 `Idempotency-Key`）
+- ✅ 叫貨統計報表 API（依日期區間查詢補貨總量）
+- ✅ 商品圖片上傳（整合 Supabase Storage）
 - ✅ Spring Security + JWT 過濾器
-- ✅ Flyway 資料庫遷移（Schema 版本管理）
-- ✅ 健康檢查與測試 API
+- ✅ Flyway 資料庫遷移
+
+### 前端 (Vue 3)
+- ✅ 管理員登入頁面
+- ✅ 管理員儀表板（側邊選單）
+- ✅ 商品管理頁面（CRUD、圖片上傳）
+- ✅ 安全庫存管理頁面（依星期管理商品安全庫存，支援樂觀鎖）
+- ✅ API 串接與 JWT 自動附加
 
 ## 🚧 進行中 / 規劃中
 
-- 前後端串接（Vue 3）
-- 叫貨統計報表（儀表板）
-- 檔案上傳（商品圖片）
+- 員工點貨前端頁面（商品列表、庫存回報、蔬菜選擇）
+- 叫貨統計報表前端儀表板
+- 分類管理前端頁面
 - 人資模組（員工出勤、薪資）
 
 ## 技術棧
@@ -33,6 +42,14 @@
 - Maven
 - Spring Security
 
+### 前端
+- Vue 3
+- Vite
+- Vue Router
+- Pinia (狀態管理)
+- Element Plus
+- Axios
+
 ## 環境要求
 
 - JDK 17
@@ -40,6 +57,8 @@
 - PostgreSQL 資料庫（建議 Supabase）
 
 ## 快速啟動
+
+### 後端
 
 1. **複製專案**
    ```bash
@@ -50,7 +69,8 @@
 powershell
 C:\maven\apache-maven-3.9.16\bin\mvn.cmd clean compile
 設定資料庫連線（使用環境變數）
-建立 application.properties（已內含佔位符），或直接設定環境變數：
+建立 application.properties（已內含佔位符），或直接設定
+環境變數：
 
 properties
 spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/postgres}
@@ -67,9 +87,33 @@ $env:DB_PASSWORD="your_password"
 $env:TENANT_ID="2"
 C:\maven\apache-maven-3.9.16\bin\mvn.cmd spring-boot:run
 
+前端
+
+進入前端目錄並安裝依賴：
+
+bash
+cd ../frontend
+npm install
+設定環境變數 (建立 .env.development)：
+
+env
+VITE_API_BASE_URL=http://localhost:8080
+啟動前端開發伺服器：
+
+bash
+npm run dev
+
 測試 API
 
-健康檢查：GET http://localhost:8080/health → OK
+健康檢查：GET http://localhost:8080/health
+
+員工登入：POST http://localhost:8080/auth/employee/login
+
+管理員登入：POST http://localhost:8080/auth/admin/login
+
+商品管理：GET /admin/products (需管理員 token)
+
+安全庫存：GET /admin/safe-stocks?dayOfWeek=1 (需管理員 token)
 
 測試資料庫連線：GET http://localhost:8080/test/db → Tenant: 2, Employee count: 1
 
@@ -81,6 +125,8 @@ json
 
 json
 { "tenantId": 2, "email": "boss@ysgs.com", "phone": "0987654321" }
+
+
 資料庫結構
 Flyway 腳本：src/main/resources/db/migration/V1__init_schema.sql
 
