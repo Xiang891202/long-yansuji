@@ -24,7 +24,9 @@ public class InvSafeStockController {
 
     @PutMapping
     public InvSafeStock updateSafeStock(@RequestBody InvSafeStock stock) {
-        stock.setTenantId(TenantContext.getTenantId());
+        Integer tenantId = TenantContext.getTenantId();
+        System.out.println("Current tenantId: " + tenantId);
+        stock.setTenantId(tenantId);
         return safeStockService.saveSafeStock(stock);
     }
 }

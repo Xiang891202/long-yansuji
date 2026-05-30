@@ -2,12 +2,16 @@ package com.ysgs.controller;
 
 import com.ysgs.config.TenantContext;
 import com.ysgs.entity.InvProduct;
+import com.ysgs.service.ImageUploadService;
 import com.ysgs.service.InvProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +22,8 @@ public class InvProductController {
 
     @Autowired
     private InvProductService productService;
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     @GetMapping
     public List<InvProduct> getAllProducts(
@@ -59,5 +65,16 @@ public class InvProductController {
     public ResponseEntity<Void> toggleActive(@PathVariable UUID id, @RequestParam Boolean isActive) {
         productService.toggleActive(id, isActive);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<String> uploadProductImage(@PathVariable UUID id,
+                                                    @RequestParam("file") MultipartFile file) throws IOException {
+        String fileName = "product_" + id.toString() + "_" + System.currentTimeMillis() + ".jpg";
+        String imageUrl = imageUploadService.uploadImage(file, fileName);
+        InvProduct product = productService.getProductById(id);
+        product.setImageUrl(imageUrl);
+        productService.updateProduct(id, product);
+        return ResponseEntity.ok(imageUrl);
     }
 }

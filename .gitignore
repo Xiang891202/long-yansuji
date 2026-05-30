@@ -35,6 +35,8 @@ mvnw.cmd
 # 環境變數檔案
 .env
 .env.*
+.env.development
+.env.production
 
 # 其他敏感檔案
 *.p12

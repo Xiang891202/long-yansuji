@@ -1,7 +1,9 @@
+C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\service\StatisticsService.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\config\SecurityConfig.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\dto\LoginResponse.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\YsgsBackendApplication.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\dto\PriceLabel.java
+C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\dto\ReplenishmentSummaryDTO.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\repository\InvCategoryRepository.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\service\InvProductService.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\entity\Employee.java
@@ -9,6 +11,7 @@ C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\config\Tenant
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\config\TenantInterceptor.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\entity\InvReplenishmentItem.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\entity\InvSafeStock.java
+C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\controller\StatisticsController.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\config\WebConfig.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\repository\InvReplenishmentRepository.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\controller\InvSafeStockController.java
@@ -19,6 +22,7 @@ C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\controller\In
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\security\JwtAuthenticationFilter.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\service\InvCategoryService.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\repository\InvInventoryReportRepository.java
+C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\service\ImageUploadService.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\entity\InvCategory.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\entity\InvProduct.java
 C:\Users\Xiang\Desktop\long-yansuji\backend\src\main\java\com\ysgs\controller\TestController.java
