@@ -7,22 +7,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class YsgsBackendApplication {
 
     public static void main(String[] args) {
-        String renderDbUrl = System.getenv("RENDER_DB_URL");
-        String renderDbUser = System.getenv("RENDER_DB_USER");
-        String renderDbPassword = System.getenv("RENDER_DB_PASSWORD");
+        // 【無條件暴力清洗】不進行任何 if 判斷，只要程式一啟動，強制把資料庫網址校正為正確的連線池
+        String targetUrl = "jdbc:postgresql://://supabase.com";
+        String targetUser = "postgres.bsgmgwwogsrtageajzks";
+        String targetPass = "2026Beautycrm";
 
-        // 【終極清洗機制】如果抓到的網址是錯的，或者包含 supabase.com 的髒資料，直接強行修正
-        if (renderDbUrl == null || renderDbUrl.contains("://://supabase.com") || renderDbUrl.trim().isEmpty()) {
-            // 直接硬性強制指向你正確的 Supabase 17-jre 連線池
-            renderDbUrl = "jdbc:postgresql://://supabase.com";
-            renderDbUser = "postgres.bsgmgwwogsrtageajzks";
-            renderDbPassword = "2026Beautycrm";
-        }
+        // 強制塞進 JVM 系統變數，徹底斷絕所有外部干擾
+        System.setProperty("spring.datasource.url", targetUrl);
+        System.setProperty("spring.datasource.username", targetUser);
+        System.setProperty("spring.datasource.password", targetPass);
 
-        // 強制寫入 JVM 系統屬性，覆蓋所有設定檔與卡住的變數
-        System.setProperty("spring.datasource.url", renderDbUrl);
-        System.setProperty("spring.datasource.username", renderDbUser);
-        System.setProperty("spring.datasource.password", renderDbPassword);
+        // 列印日誌到控制台，讓我們在 Render 畫面上 100% 確定有換成功
+        System.out.println("[CRITICAL_FIX] Database URL has been forcefully set to: " + targetUrl);
 
         SpringApplication.run(YsgsBackendApplication.class, args);
     }
