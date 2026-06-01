@@ -4,9 +4,14 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
+
+# 【核心補刀】在編譯前，強制在硬碟上物理性清空個人設定檔，徹底杜絕錯字碎片干擾編譯器
+RUN echo "spring.application.name=ysgs-backend" > src/main/resources/application-personal.properties
+
+# 執行乾淨打包
 RUN mvn clean package -DskipTests
 
-# 第二階段：執行（【關鍵修改】換成官方正確的 17-jre 鏡像，大幅加速啟動）
+# 第二階段：執行
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=builder /app/target/ysgs-backend-0.0.1-SNAPSHOT.jar app.jar
