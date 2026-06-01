@@ -12,5 +12,5 @@ WORKDIR /app
 COPY --from=builder /app/target/ysgs-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
-# 【關鍵修改】使用 shell 格式啟動，確保 Java 執行期能 100% 讀取到 Render 的環境變數
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --spring.datasource.url=\"$DB_URL\" --spring.datasource.username=\"$DB_USER\" --spring.datasource.password=\"$DB_PASSWORD\" --app.tenant-id=\"$TENANT_ID\" --supabase.url=\"$SUPABASE_URL\" --supabase.service-key=\"$SUPABASE_SERVICE_KEY\" --supabase.bucket=\"$SUPABASE_BUCKET\""]
+# 【修改回最乾淨的指令】移除所有硬編碼引用的變數，交給 Spring Boot 運行期原生讀取 Linux 環境變數
+ENTRYPOINT ["java", "-jar", "app.jar"]
