@@ -12,7 +12,7 @@ public class YsgsBackendApplication {
         String targetUser = "postgres.bsgmgwwogsrtageajzks";
         String targetPass = "2026Beautycrm";
 
-        // 強制塞進 JVM 系統變數，徹底斷絕所有外部干擾
+        // 強制塞進 JVM 系統變數，徹底斷絕所有外部環境變數的干擾
         System.setProperty("spring.datasource.url", targetUrl);
         System.setProperty("spring.datasource.username", targetUser);
         System.setProperty("spring.datasource.password", targetPass);
