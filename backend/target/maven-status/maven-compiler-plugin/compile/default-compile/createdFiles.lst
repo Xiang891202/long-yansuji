@@ -1,5 +1,7 @@
+com\ysgs\dto\EmployeeResponse.class
 com\ysgs\controller\InventoryController.class
 com\ysgs\entity\InvCategory.class
+com\ysgs\dto\EmployeeRequest.class
 com\ysgs\config\WebConfig.class
 com\ysgs\repository\InvProductRepository.class
 com\ysgs\controller\StatisticsController.class
@@ -8,7 +10,10 @@ com\ysgs\entity\InvProduct.class
 com\ysgs\controller\EmployeeAuthController.class
 com\ysgs\dto\PriceLabel.class
 com\ysgs\entity\InvReplenishment.class
+com\ysgs\service\EmployeeService.class
+com\ysgs\controller\EmployeeManageController.class
 com\ysgs\repository\InvSafeStockRepository.class
+com\ysgs\dto\ProductPublicDTO.class
 com\ysgs\service\StatisticsService.class
 com\ysgs\service\InvCategoryService.class
 com\ysgs\repository\InvReplenishmentRepository.class
@@ -23,7 +28,9 @@ com\ysgs\controller\InvSafeStockController.class
 com\ysgs\controller\InvCategoryController.class
 com\ysgs\repository\InvReplenishmentItemRepository.class
 com\ysgs\YsgsBackendApplication.class
+com\ysgs\controller\PublicController.class
 com\ysgs\controller\TestController.class
+com\ysgs\dto\InventoryProductDTO.class
 com\ysgs\service\ImageUploadService.class
 com\ysgs\security\JwtAuthenticationFilter.class
 com\ysgs\repository\InvInventoryReportRepository.class

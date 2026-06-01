@@ -1,38 +1,42 @@
 <template>
   <div class="safe-stocks-container">
-    <h2>安全庫存管理</h2>
-    <div style="margin-bottom: 16px">
+    <div class="page-header">
+      <h2>安全庫存管理</h2>
+    </div>
+    <div class="filter-bar">
       <span>選擇星期：</span>
-      <el-select v-model="selectedWeekday" placeholder="請選擇星期" @change="loadSafeStocks" style="width: 200px">
+      <el-select v-model="selectedWeekday" @change="loadSafeStocks" placeholder="請選擇星期" style="width: 200px">
         <el-option v-for="item in weekdays" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
-      <el-button type="primary" @click="openAddDialog" style="margin-left: 16px">新增商品</el-button>
+      <el-button type="primary" @click="openAddDialog">新增商品</el-button>
     </div>
 
-    <el-table :data="safeStocks" border style="width: 100%">
-      <el-table-column prop="productName" label="商品名稱" />
-      <el-table-column prop="safeQuantity" label="安全庫存量" width="180">
-        <template #default="{ row }">
-          <el-input-number v-model="row.safeQuantity" :min="0" size="small" />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="120">
-        <template #default="{ row }">
-          <el-button type="primary" size="small" @click="updateStock(row)">儲存</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="table-wrapper">
+      <el-table :data="safeStocks" border>
+        <el-table-column prop="productName" label="商品名稱" />
+        <el-table-column prop="safeQuantity" label="安全庫存量" width="180">
+          <template #default="{ row }">
+            <el-input-number v-model="row.safeQuantity" :min="0" size="small" controls-position="right" style="width: 100%" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120">
+          <template #default="{ row }">
+            <el-button type="primary" size="small" @click="updateStock(row)">儲存</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
-    <!-- 新增商品對話框 -->
-    <el-dialog title="新增安全庫存" v-model="dialogVisible" width="30%">
-      <el-form label-width="100px">
+    <!-- 新增對話框 -->
+    <el-dialog title="新增安全庫存" v-model="dialogVisible" class="stock-dialog">
+      <el-form label-position="top">
         <el-form-item label="商品">
-          <el-select v-model="newStock.productId" placeholder="請選擇商品" filterable>
+          <el-select v-model="newStock.productId" placeholder="請選擇商品" filterable style="width: 100%">
             <el-option v-for="p in allProducts" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="安全庫存量">
-          <el-input-number v-model="newStock.safeQuantity" :min="0" />
+          <el-input-number v-model="newStock.safeQuantity" :min="0" controls-position="right" style="width: 100%" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -59,94 +63,74 @@ const weekdays = [
 ];
 
 const selectedWeekday = ref(1);
-const safeStocks = ref([]);         // 當前星期安全庫存列表，每項包含 productId, productName, safeQuantity, version
-const allProducts = ref([]);        // 所有商品（用於新增對話框）
+const safeStocks = ref([]);
+const allProducts = ref([]);
 const dialogVisible = ref(false);
 const newStock = ref({ productId: '', safeQuantity: 0 });
 
-// 載入所有商品（用於新增時選擇）
 const loadAllProducts = async () => {
   try {
     const res = await api.get('/admin/products');
     allProducts.value = res.data;
-  } catch (err) {
-    console.error(err);
+  } catch {
     ElMessage.error('載入商品失敗');
   }
 };
 
-// 載入指定星期的安全庫存
 const loadSafeStocks = async () => {
   try {
     const res = await api.get('/admin/safe-stocks', { params: { dayOfWeek: selectedWeekday.value } });
-    // 後端回傳的陣列包含 productId, safeQuantity, version, 但沒有商品名稱，需補上名稱
-    const stocks = res.data;
-    // 從商品列表補上名稱 (假設 allProducts 已載入)
-    const enriched = stocks.map(stock => {
-      const product = allProducts.value.find(p => p.id === stock.productId);
-      return {
-        ...stock,
-        productName: product ? product.name : stock.productId,
-      };
+    const enriched = res.data.map((stock) => {
+      const product = allProducts.value.find((p) => p.id === stock.productId);
+      return { ...stock, productName: product ? product.name : stock.productId };
     });
     safeStocks.value = enriched;
-  } catch (err) {
-    console.error(err);
+  } catch {
     ElMessage.error('載入安全庫存失敗');
   }
 };
 
-// 更新單一商品的庫存
 const updateStock = async (row) => {
   try {
-    const payload = {
+    await api.put('/admin/safe-stocks', {
       productId: row.productId,
       dayOfWeek: selectedWeekday.value,
       safeQuantity: row.safeQuantity,
       version: row.version,
-    };
-    await api.put('/admin/safe-stocks', payload);
+    });
     ElMessage.success('更新成功');
-    // 重新載入以取得最新版本
     await loadSafeStocks();
-  } catch (err) {
-    console.error(err);
-    ElMessage.error(err.response?.data?.message || '更新失敗');
+  } catch {
+    ElMessage.error('更新失敗');
   }
 };
 
-// 開啟新增對話框
 const openAddDialog = () => {
   newStock.value = { productId: '', safeQuantity: 0 };
   dialogVisible.value = true;
 };
 
-// 新增安全庫存（若已有該星期該商品的記錄，後端會自動覆蓋？根據設計是 PUT 時若無則新增）
 const addSafeStock = async () => {
   if (!newStock.value.productId) {
     ElMessage.warning('請選擇商品');
     return;
   }
-  // 檢查是否已存在
-  const exists = safeStocks.value.some(s => s.productId === newStock.value.productId);
-  if (exists) {
+  if (safeStocks.value.some((s) => s.productId === newStock.value.productId)) {
     ElMessage.warning('該商品在本週已設定安全庫存，請直接修改數量並按「儲存」');
     return;
   }
   try {
-    const payload = {
+    await api.put('/admin/safe-stocks', {
       productId: newStock.value.productId,
       dayOfWeek: selectedWeekday.value,
       safeQuantity: newStock.value.safeQuantity,
       version: 0,
-    };
-    await api.put('/admin/safe-stocks', payload);
+    });
     ElMessage.success('新增成功');
     dialogVisible.value = false;
     await loadSafeStocks();
-  } catch (err) {
-    console.error(err);
-    ElMessage.error(err.response?.data?.message || '新增失敗');
+  } catch {
+    ElMessage.error('新增失敗');
   }
 };
 
@@ -158,5 +142,33 @@ onMounted(() => {
 <style scoped>
 .safe-stocks-container {
   padding: 20px;
+}
+.page-header h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.table-wrapper {
+  overflow-x: auto;
+}
+.stock-dialog :deep(.el-dialog) {
+  width: 90%;
+  max-width: 500px;
+  border-radius: 16px;
+}
+@media (max-width: 768px) {
+  .safe-stocks-container {
+    padding: 12px;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>

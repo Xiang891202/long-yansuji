@@ -11,4 +11,5 @@ public interface InvProductRepository extends JpaRepository<InvProduct, UUID> {
     List<InvProduct> findByTenantIdOrderBySortOrderAsc(Integer tenantId);
     List<InvProduct> findByTenantIdAndIsActiveTrueOrderBySortOrderAsc(Integer tenantId);
     List<InvProduct> findByTenantIdAndCategoryId(Integer tenantId, UUID categoryId);
+    List<InvProduct> findByTenantIdAndCategoryIdAndIsActiveTrueOrderBySortOrderAsc(Integer tenantId, UUID categoryId);
 }

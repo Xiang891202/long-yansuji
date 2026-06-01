@@ -1,28 +1,54 @@
-# Compiled class files
-*.class
+# ============================================
+# 後端 (Spring Boot / Maven)
+# ============================================
+# 編譯產物
 /target/
+*.class
 
-# IDE files
+# Maven 包裝器（若使用則保留，若不使用則忽略）
+.mvn/
+mvnw
+mvnw.cmd
+
+# 後端 Docker 相關（保留 Dockerfile，但忽略建置快取）
+*.dockerignore
+Dockerfile.cache
+
+# ============================================
+# 前端 (Vue 3 / Vite)
+# ============================================
+# 依賴目錄
+frontend/node_modules/
+frontend/.vite/
+
+# 建置產物
+frontend/dist/
+frontend/.cache
+
+# ============================================
+# IDE 與編輯器
+# ============================================
 .idea/
 *.iml
 .classpath
 .project
 .settings/
 .vscode/
+*.swp
+*.swo
+*~
 
-# Logs
-*.log
-
-# OS generated files
+# ============================================
+# 作業系統雜項
+# ============================================
 .DS_Store
 Thumbs.db
+*.log
 
-# Maven wrapper
-.mvn/
-mvnw
-mvnw.cmd
-
-# 敏感設定檔（含密碼）
+# ============================================
+# 敏感設定檔（含密碼、金鑰）
+# ============================================
+# 後端設定（環境變數佔位符版本可提交，但個人/客戶版不可提交）
 **/application.properties
 **/application.yml
 **/application-dev.properties
@@ -30,14 +56,39 @@ mvnw.cmd
 **/application-personal.properties
 **/application-customer.properties
 **/bootstrap.properties
+
+# VSCode 啟動設定（可能含環境變數）
 **/launch.json
 
-# 環境變數檔案
+# 環境變數檔案（Docker 與本地開發）
 .env
 .env.*
-.env.development
-.env.production
+!.env.example
+!.env.sample
 
-# 其他敏感檔案
+# 其他金鑰或憑證
 *.p12
 *.key
+*.pem
+*.crt
+
+# ============================================
+# Docker 相關（排除本機建置快取、敏感 .env）
+# ============================================
+docker-compose.override.yml
+.dockerignore
+
+# ============================================
+# 測試與報告
+# ============================================
+target/surefire-reports/
+target/failsafe-reports/
+*.dump
+*.log
+
+# ============================================
+# 臨時檔案
+# ============================================
+*.tmp
+*.bak
+*.orig

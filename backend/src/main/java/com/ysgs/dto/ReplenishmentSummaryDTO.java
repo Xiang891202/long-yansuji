@@ -1,14 +1,15 @@
 package com.ysgs.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 public class ReplenishmentSummaryDTO {
     private UUID productId;
     private String productName;
-    private Integer totalQuantity;
-    private Integer count;
+    private Long totalQuantity;   // 改為 Long
+    private Long count;           // 改為 Long
 }

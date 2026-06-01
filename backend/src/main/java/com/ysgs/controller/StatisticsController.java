@@ -23,6 +23,8 @@ public class StatisticsController {
     public List<ReplenishmentSummaryDTO> getReplenishmentSummary(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        
+        // System.out.println("=== StatisticsController.getReplenishmentSummary called ===");
         Integer tenantId = TenantContext.getTenantId();
         return statisticsService.getReplenishmentSummary(tenantId, startDate, endDate);
     }
