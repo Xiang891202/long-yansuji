@@ -43,10 +43,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // Vue 開發伺服器
-        config.setAllowedMethods(List.of("*")); // 允許所有 HTTP 方法
-        config.setAllowedHeaders(List.of("*")); // 允許所有請求頭
-        config.setAllowCredentials(true);       // 允許攜帶憑證 (Cookie / Authorization)
+        config.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "https://long-yansuji-personal.vercel.app"   // 替换为你的实际 Vercel 域名
+        ));
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
