@@ -1,4 +1,4 @@
-# 第一階段：編譯（保持不變）
+# 第一階段：編譯
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY pom.xml .
@@ -12,11 +12,5 @@ WORKDIR /app
 COPY --from=builder /app/target/ysgs-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
-# 【最終制裁指令】利用 Java 命令列參數 (-D) 暴力強行注入！
-# 這種寫法是 Java 最高的配置權限，會直接碾壓並無視 JAR 包內部任何損壞的 properties 檔案
-ENTRYPOINT ["java", \
-            "-Dspring.datasource.url=jdbc:postgresql://://supabase.com", \
-            "-Dspring.datasource.username=postgres.bsgmgwwogsrtageajzks", \
-            "-Dspring.datasource.password=2026Beautycrm", \
-            "-Dspring.datasource.properties.sslfactory=org.postgresql.ssl.NonValidatingFactory", \
-            "-jar", "app.jar"]
+# 使用環境變數（不再硬編碼任何配置）
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
