@@ -18,20 +18,25 @@
 - ✅ Flyway 資料庫遷移
 - ✅ 單元測試（Service 層與 Controller 層，覆蓋核心邏輯）
 - ✅ Docker 容器化（支援 Render 部署）
+- ✅ 健康檢查端點 `/health`（供前端等待頁面偵測）
 
 ### 前端 (Vue 3)
-- ✅ 管理員登入頁面（RWD 優化）
-- ✅ 員工登入頁面（RWD 優化）
-- ✅ 管理員儀表板（手機版抽屜式導航）
-- ✅ 商品管理頁面（分類分組、CRUD、圖片上傳、RWD）
+- ✅ 管理員登入頁面（RWD 優化，加入 loading 狀態）
+- ✅ 員工登入頁面（RWD 優化，加入 loading 狀態）
+- ✅ 管理員儀表板（手機版抽屜式導航，側邊欄視覺升級）
+- ✅ 商品管理頁面（分類分組、卡片式商品列表、CRUD、圖片上傳、RWD）
 - ✅ 安全庫存管理頁面（依星期管理、樂觀鎖、RWD）
 - ✅ 分類管理頁面（CRUD、RWD）
-- ✅ 人資管理頁面（員工 CRUD、啟用/停用）
-- ✅ 叫貨統計報表（日期區間、表格、ECharts 圖表）
-- ✅ 員工點貨頁面（動態載入蔬菜清單、庫存回報、冪等性）
+- ✅ 人資管理頁面（員工 CRUD、啟用/停用、loading 狀態）
+- ✅ 叫貨統計報表（日期區間選擇器優化，手機版拆分為兩個獨立選擇器，移除圖表）
+- ✅ 員工點貨頁面（動態載入蔬菜清單、庫存回報、冪等性、RWD 優化，蔬菜標籤字體放大）
 - ✅ 公開首頁（商品展示、分類篩選、RWD）
+- ✅ 後端啟動等待頁面（倒計時自動重試，最多 3 次，失敗後提示，支援手動刷新）
+- ✅ 全域按鈕 loading 狀態（防止重複點擊）
+- ✅ 定時喚醒後端（每 30 分鐘 ping `/health`，避免 Render 免費服務休眠）
 - ✅ API 串接與 JWT 自動附加
 - ✅ 響應式設計（手機、平板、桌機）
+- ✅ PWA 配置（manifest, 圖標，支援添加到主螢幕）
 
 ## 🚧 規劃中
 - 線上點餐模組（購物車、訂單）
@@ -58,7 +63,8 @@
 - Pinia
 - Element Plus
 - Axios
-- ECharts
+- ECharts (已移除統計圖表以優化手機效能)
+- Vite PWA Plugin
 
 ## 環境要求
 
@@ -92,6 +98,8 @@ $env:SUPABASE_URL="https://your-project.supabase.co"
 $env:SUPABASE_SERVICE_KEY="your_service_role_key"
 $env:SUPABASE_BUCKET="long-yansuji-products"
 
+若使用池化連線，URL 改為 jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require，使用者名稱改為 postgres.<project_ref>。
+
 4.啟動後端：
 
 powershell
@@ -107,8 +115,9 @@ npm install
 
 2.設定環境變數 (建立 .env.development)：
 
-env
 VITE_API_BASE_URL=http://localhost:8080
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
 
 3.啟動前端開發伺服器：
 
@@ -154,6 +163,10 @@ Flyway 腳本：src/main/resources/db/migration/V1__init_schema.sql
 租戶 ID 在資料庫中為 INTEGER，對應 Java 中的 Integer。
 
 多租戶隔離透過 TenantInterceptor 自動注入當前租戶 ID。
+
+前端等待頁面會自動偵測後端 /health，若後端未啟動會顯示倒數計時，最多重試 3 次。
+
+Render 免費服務可能因閒置而休眠，前端定時喚醒機制可緩解，但首次啟動仍須等待約 30~60 秒。
 
 授權
 本專案為商業用途，未經授權不得任意散佈。
