@@ -8,18 +8,15 @@
     <div class="table-wrapper">
       <el-table :data="categories" border>
         <el-table-column prop="name" label="分類名稱" />
-        <!-- <el-table-column prop="code" label="代碼" />
-        <el-table-column prop="sortOrder" label="排序" width="100" /> -->
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">編輯</el-button>
-            <el-button size="small" type="danger" @click="deleteCategory(row.id)">刪除</el-button>
+            <el-button size="small" type="danger" :loading="deleteLoading === row.id" @click="deleteCategory(row.id)">刪除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <!-- 新增/編輯對話框 -->
     <el-dialog :title="dialogTitle" v-model="dialogVisible" class="category-dialog">
       <el-form :model="form" label-position="top">
         <el-form-item label="分類名稱" required>
@@ -34,7 +31,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">{{ isEdit ? '更新' : '新增' }}</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">{{ isEdit ? '更新' : '新增' }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -44,6 +41,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import api from '@/api/axios';
+import { useLoading } from '@/composables/useLoading';
 
 const categories = ref([]);
 const dialogVisible = ref(false);
@@ -51,6 +49,9 @@ const isEdit = ref(false);
 const form = ref({ id: null, name: '', code: '', sortOrder: 0 });
 
 const dialogTitle = computed(() => (isEdit.value ? '編輯分類' : '新增分類'));
+
+const { isLoading: submitLoading, withLoading: withSubmitLoading } = useLoading();
+const deleteLoading = ref(null);
 
 const loadCategories = async () => {
   try {
@@ -73,27 +74,24 @@ const openEditDialog = (row) => {
   dialogVisible.value = true;
 };
 
-const submitForm = async () => {
+const submitForm = () => withSubmitLoading(async () => {
   if (!form.value.name || !form.value.code) {
     ElMessage.warning('請填寫分類名稱與代碼');
     return;
   }
-  try {
-    if (isEdit.value) {
-      await api.put(`/admin/categories/${form.value.id}`, form.value);
-      ElMessage.success('更新成功');
-    } else {
-      await api.post('/admin/categories', form.value);
-      ElMessage.success('新增成功');
-    }
-    dialogVisible.value = false;
-    await loadCategories();
-  } catch {
-    ElMessage.error('操作失敗');
+  if (isEdit.value) {
+    await api.put(`/admin/categories/${form.value.id}`, form.value);
+    ElMessage.success('更新成功');
+  } else {
+    await api.post('/admin/categories', form.value);
+    ElMessage.success('新增成功');
   }
-};
+  dialogVisible.value = false;
+  await loadCategories();
+});
 
 const deleteCategory = async (id) => {
+  deleteLoading.value = id;
   try {
     await ElMessageBox.confirm('確定刪除此分類？', '提示', { type: 'warning' });
     await api.delete(`/admin/categories/${id}`);
@@ -101,6 +99,8 @@ const deleteCategory = async (id) => {
     await loadCategories();
   } catch (err) {
     if (err !== 'cancel') ElMessage.error('刪除失敗');
+  } finally {
+    deleteLoading.value = null;
   }
 };
 
@@ -110,6 +110,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 保持原样式 */
 .categories-container {
   padding: 20px;
 }

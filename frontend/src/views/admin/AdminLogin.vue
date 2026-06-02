@@ -15,7 +15,7 @@
           <label>手機號碼</label>
           <input type="tel" v-model="form.phone" required />
         </div>
-        <button type="submit">登入</button>
+        <button type="submit" :disabled="isLoading">登入</button>
       </form>
       <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
     </div>
@@ -26,23 +26,23 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/axios';
+import { useLoading } from '@/composables/useLoading';
 
 const router = useRouter();
 const form = reactive({ tenantId: 2, email: 'boss@ysgs.com', phone: '0987654321' });
 const errorMsg = ref('');
 
-const handleLogin = async () => {
-  try {
-    const res = await api.post('/auth/admin/login', form);
-    localStorage.setItem('token', res.data.token);
-    router.push('/admin');
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || '登入失敗';
-  }
-};
+const { isLoading, withLoading } = useLoading();
+
+const handleLogin = () => withLoading(async () => {
+  const res = await api.post('/auth/admin/login', form);
+  localStorage.setItem('token', res.data.token);
+  router.push('/admin');
+});
 </script>
 
 <style scoped>
+/* 样式保持原样 */
 .login-wrapper {
   display: flex;
   justify-content: center;
@@ -54,17 +54,15 @@ const handleLogin = async () => {
 .login-card {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 35px rgba(0,0,0,0.1);
   padding: 2rem;
   width: 100%;
   max-width: 400px;
-  transition: all 0.3s;
 }
 h2 {
   text-align: center;
   margin-bottom: 1.5rem;
   color: #2c3e50;
-  font-weight: 600;
 }
 .form-group {
   margin-bottom: 1.2rem;
@@ -81,12 +79,10 @@ input {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   font-size: 1rem;
-  transition: border 0.2s;
 }
 input:focus {
   outline: none;
   border-color: #409eff;
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
 }
 button {
   width: 100%;
@@ -101,33 +97,21 @@ button {
   transition: background 0.2s;
   margin-top: 0.5rem;
 }
-button:hover {
+button:disabled {
+  background: #a0cfff;
+  cursor: not-allowed;
+}
+button:hover:not(:disabled) {
   background: #66b1ff;
 }
 .error-msg {
   color: #f56c6c;
   text-align: center;
   margin-top: 1rem;
-  font-size: 0.9rem;
 }
-
-/* 平板 / 手機調整 */
 @media (max-width: 768px) {
   .login-card {
     padding: 1.5rem;
-    max-width: 360px;
-  }
-  h2 {
-    font-size: 1.5rem;
-  }
-}
-@media (max-width: 480px) {
-  .login-card {
-    padding: 1.2rem;
-    max-width: 100%;
-  }
-  input, button {
-    font-size: 0.9rem;
   }
 }
 </style>

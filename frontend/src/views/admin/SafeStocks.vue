@@ -21,13 +21,12 @@
         </el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="updateStock(row)">儲存</el-button>
+            <el-button type="primary" size="small" :loading="updateLoading === row.productId" @click="updateStock(row)">儲存</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <!-- 新增對話框 -->
     <el-dialog title="新增安全庫存" v-model="dialogVisible" class="stock-dialog">
       <el-form label-position="top">
         <el-form-item label="商品">
@@ -41,7 +40,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="addSafeStock">確定</el-button>
+        <el-button type="primary" :loading="addLoading" @click="addSafeStock">確定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -51,6 +50,7 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import api from '@/api/axios';
+import { useLoading } from '@/composables/useLoading';
 
 const weekdays = [
   { label: '星期一', value: 1 },
@@ -67,6 +67,9 @@ const safeStocks = ref([]);
 const allProducts = ref([]);
 const dialogVisible = ref(false);
 const newStock = ref({ productId: '', safeQuantity: 0 });
+
+const updateLoading = ref(null);
+const { isLoading: addLoading, withLoading: withAddLoading } = useLoading();
 
 const loadAllProducts = async () => {
   try {
@@ -91,6 +94,7 @@ const loadSafeStocks = async () => {
 };
 
 const updateStock = async (row) => {
+  updateLoading.value = row.productId;
   try {
     await api.put('/admin/safe-stocks', {
       productId: row.productId,
@@ -102,6 +106,8 @@ const updateStock = async (row) => {
     await loadSafeStocks();
   } catch {
     ElMessage.error('更新失敗');
+  } finally {
+    updateLoading.value = null;
   }
 };
 
@@ -110,7 +116,7 @@ const openAddDialog = () => {
   dialogVisible.value = true;
 };
 
-const addSafeStock = async () => {
+const addSafeStock = () => withAddLoading(async () => {
   if (!newStock.value.productId) {
     ElMessage.warning('請選擇商品');
     return;
@@ -119,20 +125,16 @@ const addSafeStock = async () => {
     ElMessage.warning('該商品在本週已設定安全庫存，請直接修改數量並按「儲存」');
     return;
   }
-  try {
-    await api.put('/admin/safe-stocks', {
-      productId: newStock.value.productId,
-      dayOfWeek: selectedWeekday.value,
-      safeQuantity: newStock.value.safeQuantity,
-      version: 0,
-    });
-    ElMessage.success('新增成功');
-    dialogVisible.value = false;
-    await loadSafeStocks();
-  } catch {
-    ElMessage.error('新增失敗');
-  }
-};
+  await api.put('/admin/safe-stocks', {
+    productId: newStock.value.productId,
+    dayOfWeek: selectedWeekday.value,
+    safeQuantity: newStock.value.safeQuantity,
+    version: 0,
+  });
+  ElMessage.success('新增成功');
+  dialogVisible.value = false;
+  await loadSafeStocks();
+});
 
 onMounted(() => {
   loadAllProducts().then(() => loadSafeStocks());

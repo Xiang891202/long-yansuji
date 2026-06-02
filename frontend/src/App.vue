@@ -1,8 +1,16 @@
 <template>
-  <router-view />
+  <div id="app">
+    <BackendWaitView v-if="!backendReady" />
+    <router-view v-else />
+  </div>
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useBackendState } from '@/stores/backend';
+import BackendWaitView from '@/components/BackendWaitView.vue';
+
+const { backendReady } = useBackendState();
 </script>
 
 <!-- App.vue 中的 style 區塊 -->

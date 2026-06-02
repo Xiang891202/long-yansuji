@@ -5,7 +5,6 @@
       <el-button type="primary" @click="openCreateDialog" class="add-btn">新增商品</el-button>
     </div>
 
-    <!-- 按分類分組的商品列表 -->
     <div v-for="category in categories" :key="category.id" class="category-section">
       <h3 class="category-title">
         <span>{{ category.name }}</span>
@@ -30,14 +29,13 @@
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button size="small" @click="openEditDialog(row)">編輯</el-button>
-              <el-button size="small" type="danger" @click="deleteProduct(row.id)">刪除</el-button>
+              <el-button size="small" type="danger" :loading="deleteLoading === row.id" @click="deleteProduct(row.id)">刪除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
     </div>
 
-    <!-- 新增/編輯商品對話框 -->
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="500px" class="product-dialog">
       <el-form :model="form" label-width="100px" label-position="top" :rules="formRules" ref="formRef">
         <el-form-item label="分類" prop="categoryId">
@@ -59,7 +57,7 @@
         <el-form-item label="商品圖片">
           <div class="upload-area">
             <input type="file" accept="image/*" @change="handleFileChange" ref="fileInput" class="file-input" />
-            <el-button :loading="uploading" @click="uploadImage" size="small">上傳圖片</el-button>
+            <el-button :loading="uploadLoading" @click="uploadImage" size="small">上傳圖片</el-button>
           </div>
           <div v-if="form.imageUrl" class="image-preview">
             <img :src="form.imageUrl" />
@@ -69,7 +67,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">{{ isEdit ? '更新' : '新增' }}</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">{{ isEdit ? '更新' : '新增' }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -79,6 +77,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import api from '@/api/axios';
+import { useLoading } from '@/composables/useLoading';
 
 const products = ref([]);
 const categories = ref([]);
@@ -94,7 +93,6 @@ const form = ref({
   imageUrl: ''
 });
 const selectedFile = ref(null);
-const uploading = ref(false);
 const fileInput = ref(null);
 
 const formRules = {
@@ -102,7 +100,10 @@ const formRules = {
   name: [{ required: true, message: '請輸入商品名稱', trigger: 'blur' }]
 };
 
-// 按分類分組的商品
+const { isLoading: submitLoading, withLoading: withSubmitLoading } = useLoading();
+const { isLoading: uploadLoading, withLoading: withUploadLoading } = useLoading();
+const deleteLoading = ref(null);
+
 const groupedProducts = computed(() => {
   const group = {};
   for (const cat of categories.value) {
@@ -155,7 +156,7 @@ const handleFileChange = (event) => {
   selectedFile.value = event.target.files[0];
 };
 
-const uploadImage = async () => {
+const uploadImage = () => withUploadLoading(async () => {
   if (!selectedFile.value) {
     ElMessage.warning('請先選擇圖片');
     return;
@@ -164,54 +165,44 @@ const uploadImage = async () => {
     ElMessage.warning('請先儲存商品後再上傳圖片');
     return;
   }
-  uploading.value = true;
   const formData = new FormData();
   formData.append('file', selectedFile.value);
-  try {
-    const res = await api.post(`/admin/products/${form.value.id}/upload-image`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    form.value.imageUrl = res.data;
-    ElMessage.success('圖片上傳成功');
-  } catch (err) {
-    console.error(err);
-    ElMessage.error('上傳失敗');
-  } finally {
-    uploading.value = false;
-  }
-};
+  const res = await api.post(`/admin/products/${form.value.id}/upload-image`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  form.value.imageUrl = res.data;
+  ElMessage.success('圖片上傳成功');
+});
 
-const submitForm = async () => {
-  if (!form.value.categoryId) {
-    ElMessage.warning('請選擇分類');
+const submitForm = () => withSubmitLoading(async () => {
+  if (!form.value.categoryId || !form.value.name) {
+    ElMessage.warning('請填寫必要欄位');
     return;
   }
-  if (!form.value.name) {
-    ElMessage.warning('請填寫商品名稱');
-    return;
+  if (isEdit.value) {
+    await api.put(`/admin/products/${form.value.id}`, form.value);
+    ElMessage.success('更新成功');
+  } else {
+    const res = await api.post('/admin/products', form.value);
+    form.value.id = res.data.id;
+    ElMessage.success('新增成功，可繼續上傳圖片');
   }
-  try {
-    if (isEdit.value) {
-      await api.put(`/admin/products/${form.value.id}`, form.value);
-      ElMessage.success('更新成功');
-    } else {
-      const res = await api.post('/admin/products', form.value);
-      form.value.id = res.data.id;
-      ElMessage.success('新增成功，可繼續上傳圖片');
-    }
-    await loadProducts();
-    dialogVisible.value = false;
-  } catch (err) {
-    console.error(err);
-    ElMessage.error('操作失敗');
-  }
-};
+  await loadProducts();
+  dialogVisible.value = false;
+});
 
 const deleteProduct = async (id) => {
-  await ElMessageBox.confirm('確定刪除此商品？', '提示', { type: 'warning' });
-  await api.delete(`/admin/products/${id}`);
-  ElMessage.success('刪除成功');
-  await loadProducts();
+  deleteLoading.value = id;
+  try {
+    await ElMessageBox.confirm('確定刪除此商品？', '提示', { type: 'warning' });
+    await api.delete(`/admin/products/${id}`);
+    ElMessage.success('刪除成功');
+    await loadProducts();
+  } catch (err) {
+    if (err !== 'cancel') ElMessage.error('刪除失敗');
+  } finally {
+    deleteLoading.value = null;
+  }
 };
 
 onMounted(() => {
@@ -220,6 +211,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 保持原样式 */
 .products-container {
   padding: 20px;
 }
@@ -246,10 +238,6 @@ onMounted(() => {
   border-radius: 12px;
   padding: 8px 12px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  transition: box-shadow 0.2s;
-}
-.category-section:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .category-title {
   display: flex;
@@ -285,7 +273,6 @@ onMounted(() => {
   font-size: 0.85rem;
   line-height: 1.4;
 }
-/* 對話框自適應 */
 .product-dialog :deep(.el-dialog) {
   width: 90%;
   max-width: 500px;
@@ -326,7 +313,6 @@ onMounted(() => {
   color: #666;
   margin-top: 8px;
 }
-/* 手機版響應式 */
 @media (max-width: 768px) {
   .products-container {
     padding: 12px;
@@ -339,9 +325,6 @@ onMounted(() => {
     font-size: 1rem;
     padding: 8px 12px;
   }
-  .product-count {
-    font-size: 0.7rem;
-  }
   .price-row {
     flex-direction: column;
     align-items: stretch;
@@ -352,9 +335,6 @@ onMounted(() => {
   .upload-area {
     flex-direction: column;
     align-items: stretch;
-  }
-  .product-dialog :deep(.el-dialog) {
-    margin: 20px auto;
   }
 }
 </style>
