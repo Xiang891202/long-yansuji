@@ -1,8 +1,11 @@
 ﻿import axios from 'axios';
 import router from '../router';
 
+// 从环境变量获取 API 基础地址，如果没有则回退到 localhost（开发环境）
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
@@ -20,20 +23,15 @@ api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      // 清除已失效的 token
       localStorage.removeItem('token');
-      // 根據當前路徑決定跳轉
       const currentPath = router.currentRoute.value.path;
       if (currentPath.startsWith('/admin')) {
         router.push('/admin/login');
       } else if (currentPath.startsWith('/inventory')) {
         router.push('/employee/login');
       } else {
-        // 其他情況可預設跳轉到員工登入或首頁
         router.push('/employee/login');
       }
-      // 可選：顯示提示訊息
-      // ElMessage.error('登入已過期，請重新登入');
     }
     return Promise.reject(error);
   }
