@@ -27,11 +27,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 啟用 CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/employee/login", "/auth/admin/login", "/health", "/test/**").permitAll()
+                .requestMatchers("/auth/employee/login", "/auth/admin/login", "/health", "/test/**", "/public/**").permitAll()
                 .anyRequest().authenticated()
             );
 
