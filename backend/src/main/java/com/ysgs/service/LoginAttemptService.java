@@ -15,7 +15,7 @@ public class LoginAttemptService {
     private static final ConcurrentHashMap<String, Long> IP_COUNT_MAP = new ConcurrentHashMap<>();
     private static final long IP_WINDOW_MS = 60_000;
     
-    private static final int IP_MAX_ATTEMPTS = 20; // 測試用，正式可改10
+    private static final int IP_MAX_ATTEMPTS = 10; // 測試用，正式可改10
 
     private static final int ACCOUNT_MAX_FAILURES = 5;
     private static final long LOCK_DURATION_MINUTES = 15; // 測試用，正式可改15
