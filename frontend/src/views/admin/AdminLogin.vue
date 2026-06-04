@@ -12,10 +12,10 @@
           <input type="email" v-model="form.email" required />
         </div>
         <div class="form-group">
-          <label>手機號碼</label>
-          <input type="tel" v-model="form.phone" required />
+          <label>密碼</label>
+          <input type="password" v-model="form.password" required />
         </div>
-        <button type="submit" :disabled="isLoading">登入</button>
+        <button type="submit" :disabled="isLoading || isLocked">登入</button>
       </form>
       <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
     </div>
@@ -23,21 +23,13 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '@/api/axios';
-import { useLoading } from '@/composables/useLoading';
+import { onMounted } from 'vue';
+import { useLogin } from '@/composables/useLogin';
 
-const router = useRouter();
-const form = reactive({ tenantId: 2, email: 'boss@ysgs.com', phone: '0987654321' });
-const errorMsg = ref('');
+const { form, errorMsg, isLoading, isLocked, handleLogin, initLockState } = useLogin('admin');
 
-const { isLoading, withLoading } = useLoading();
-
-const handleLogin = () => withLoading(async () => {
-  const res = await api.post('/auth/admin/login', form);
-  localStorage.setItem('token', res.data.token);
-  router.push('/admin');
+onMounted(() => {
+  initLockState();
 });
 </script>
 

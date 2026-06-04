@@ -39,6 +39,9 @@ public class Employee {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Column(name = "is_active")
     private Boolean isActive = true;
 

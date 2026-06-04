@@ -12,10 +12,10 @@
           <input type="text" v-model="form.identityNumber" required />
         </div>
         <div class="form-group">
-          <label>生日</label>
-          <input type="date" v-model="form.birthDate" required />
+          <label>密碼</label>
+          <input type="password" v-model="form.password" required />
         </div>
-        <button type="submit" :disabled="isLoading">登入</button>
+        <button type="submit" :disabled="isLoading || isLocked">登入</button>
       </form>
       <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
     </div>
@@ -23,30 +23,18 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '@/api/axios';
-import { useLoading } from '@/composables/useLoading';
+import { onMounted } from 'vue';
+import { useLogin } from '@/composables/useLogin';
 
-const router = useRouter();
-const form = reactive({
-  tenantId: 2,
-  identityNumber: 'B987654321',
-  birthDate: '1990-01-02'
-});
-const errorMsg = ref('');
+const { form, errorMsg, isLoading, isLocked, handleLogin, initLockState } = useLogin('employee');
 
-const { isLoading, withLoading } = useLoading();
-
-const handleLogin = () => withLoading(async () => {
-  const res = await api.post('/auth/employee/login', form);
-  localStorage.setItem('token', res.data.token);
-  router.push('/inventory');
+onMounted(() => {
+  initLockState();
 });
 </script>
 
 <style scoped>
-/* 样式同 AdminLogin */
+/* 样式与之前相同，无变动 */
 .login-wrapper {
   display: flex;
   justify-content: center;

@@ -8,6 +8,35 @@
       </div>
     </header>
 
+    <!-- ========== 新增：PWA 分流導覽列 ========== -->
+    <div class="pwa-nav">
+      <div class="container">
+        <!-- 桌面版／平板顯示按鈕 -->
+        <div class="nav-links desktop-nav">
+          <router-link to="/employee/login" class="nav-btn">員工登入</router-link>
+          <router-link to="/admin/login" class="nav-btn">管理登入</router-link>
+          <a href="https://line.me/R/ti/p/@812dupzg" target="_blank" rel="noopener noreferrer" class="nav-btn line-btn">
+            線上訂餐 (LINE)
+          </a>
+        </div>
+        <!-- 手機版漢堡包圖示 -->
+        <div class="mobile-nav">
+          <div class="hamburger" @click="toggleMenu">
+            <span></span><span></span><span></span>
+          </div>
+          <transition name="fade">
+            <div v-if="menuOpen" class="mobile-menu" @click="menuOpen = false">
+              <router-link to="/employee/login" class="mobile-nav-btn">員工登入</router-link>
+              <router-link to="/admin/login" class="mobile-nav-btn">管理登入</router-link>
+              <a href="https://line.me/R/ti/p/@812dupzg" target="_blank" rel="noopener noreferrer" class="mobile-nav-btn line-btn">
+                線上訂餐 (LINE)
+              </a>
+            </div>
+          </transition>
+        </div>
+      </div>
+    </div>
+
     <!-- 分類導航列 -->
     <nav class="category-nav">
       <div class="container">
@@ -34,7 +63,6 @@
               {{ price.label }} ${{ price.price }}
             </span>
           </div>
-          <!-- <button class="order-btn">立即點餐</button> -->
         </div>
       </div>
     </main>
@@ -55,6 +83,7 @@ import api from '@/api/axios';
 const products = ref([]);
 const categories = ref([]);
 const currentCategory = ref(null);
+const menuOpen = ref(false);
 
 // 載入分類
 const loadCategories = async () => {
@@ -80,6 +109,15 @@ const loadProducts = async (categoryId = null) => {
 const filterByCategory = (categoryId) => {
   currentCategory.value = categoryId;
   loadProducts(categoryId);
+};
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value;
+};
+
+// 點擊選單外部關閉（可選，簡單實現）
+const closeMenu = () => {
+  menuOpen.value = false;
 };
 
 onMounted(() => {
@@ -121,12 +159,118 @@ onMounted(() => {
   opacity: 0.9;
 }
 
-/* 分類導航 */
+/* ========== 新增：導覽列樣式 ========== */
+.pwa-nav {
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.nav-links {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 12px 0;
+}
+.nav-btn {
+  padding: 8px 20px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s;
+  background-color: #f5f5f5;
+  color: #333;
+}
+.nav-btn:hover {
+  background-color: #409eff;
+  color: white;
+}
+.line-btn {
+  background-color: #06c755;
+  color: white;
+}
+.line-btn:hover {
+  background-color: #059e44;
+}
+
+/* 手機版隱藏桌面導航，顯示漢堡包 */
+.mobile-nav {
+  display: none;
+  position: relative;
+  padding: 10px 0;
+}
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 24px;
+  cursor: pointer;
+}
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+  transition: 0.2s;
+}
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 180px;
+  z-index: 300;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.mobile-nav-btn {
+  display: block;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+}
+.mobile-nav-btn:last-child {
+  border-bottom: none;
+}
+.mobile-nav-btn:hover {
+  background-color: #f5f5f5;
+}
+.line-btn.mobile-nav-btn {
+  background-color: #06c755;
+  color: white;
+}
+.line-btn.mobile-nav-btn:hover {
+  background-color: #059e44;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-nav {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* 分類導航 (原有樣式微調) */
 .category-nav {
   background-color: #fff6e5;
   border-bottom: 1px solid #ffcc80;
   position: sticky;
-  top: 0;
+  top: 52px; /* 配合導覽列高度 */
   z-index: 100;
 }
 .category-nav ul {
@@ -148,7 +292,6 @@ onMounted(() => {
 .category-nav li.active {
   background: #d32f2f;
   color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .category-nav li:hover {
   background: #ffb74d;
@@ -197,7 +340,6 @@ onMounted(() => {
   color: #777;
   font-size: 0.85rem;
   margin-bottom: 12px;
-  line-height: 1.4;
 }
 .price-list {
   display: flex;
@@ -213,22 +355,6 @@ onMounted(() => {
   font-weight: bold;
   color: #c62828;
 }
-.order-btn {
-  background: #d32f2f;
-  color: white;
-  border: none;
-  width: 100%;
-  padding: 10px;
-  border-radius: 40px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 8px;
-}
-.order-btn:hover {
-  background: #b71c1c;
-}
-
 /* 頁尾 */
 .footer {
   background-color: #2c3e50;
@@ -237,7 +363,6 @@ onMounted(() => {
   padding: 20px;
   font-size: 0.9rem;
 }
-
 /* 預設無圖片時 */
 .product-image img[src=""] {
   display: none;
@@ -245,10 +370,10 @@ onMounted(() => {
 .product-image:has(img[src=""]) {
   background: url('https://via.placeholder.com/200x150?text=No+Image') center/contain no-repeat;
 }
-
+/* 手機版商品單列 */
 @media (max-width: 480px) {
   .product-grid {
-    grid-template-columns: 1fr;  /* 手機上單列 */
+    grid-template-columns: 1fr;
   }
 }
 </style>

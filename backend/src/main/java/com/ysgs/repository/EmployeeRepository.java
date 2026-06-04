@@ -12,6 +12,6 @@ import java.util.UUID;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByTenantIdAndIdentityNumberAndBirthDate(Integer tenantId, String identityNumber, LocalDate birthDate);
-    
-    List<Employee> findByTenantId(Integer tenantId);   // 新增方法
+    List<Employee> findByTenantId(Integer tenantId);
+    Optional<Employee> findByIdentityNumber(String identityNumber);   // 新增
 }

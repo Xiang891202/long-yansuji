@@ -32,8 +32,8 @@
         <el-form-item label="身分證字號" required>
           <el-input v-model="form.identityNumber" placeholder="請輸入身分證字號" />
         </el-form-item>
-        <el-form-item label="生日" required>
-          <el-date-picker v-model="form.birthDate" type="date" value-format="YYYY-MM-DD" placeholder="選擇日期" style="width: 100%" />
+        <el-form-item label="密碼" required>
+          <el-input type="password" v-model="form.password" placeholder="請輸入密碼" show-password />
         </el-form-item>
         <el-form-item label="狀態">
           <el-switch v-model="form.isActive" active-text="啟用" inactive-text="停用" />
@@ -65,7 +65,7 @@ const form = ref({
   id: null,
   name: '',
   identityNumber: '',
-  birthDate: '',
+  password: '',          // 新增密碼欄位
   isActive: true,
   permissions: [],
 });
@@ -86,26 +86,46 @@ const loadEmployees = async () => {
 
 const openCreateDialog = () => {
   isEdit.value = false;
-  form.value = { id: null, name: '', identityNumber: '', birthDate: '', isActive: true, permissions: [] };
+  form.value = {
+    id: null,
+    name: '',
+    identityNumber: '',
+    password: '',
+    isActive: true,
+    permissions: [],
+  };
   dialogVisible.value = true;
 };
 
 const openEditDialog = (row) => {
   isEdit.value = true;
-  form.value = { ...row };
+  // 注意：編輯時密碼不回填（安全考量），後端更新時若密碼為空則不修改密碼
+  form.value = {
+    ...row,
+    password: '',   // 編輯時不清除原有密碼，但表單中密碼欄位留空表示不修改
+  };
   dialogVisible.value = true;
 };
 
 const submitForm = () => withSubmitLoading(async () => {
-  if (!form.value.name || !form.value.identityNumber || !form.value.birthDate) {
-    ElMessage.warning('請填寫必要欄位');
+  if (!form.value.name || !form.value.identityNumber) {
+    ElMessage.warning('請填寫姓名與身分證字號');
     return;
   }
+  if (!isEdit.value && !form.value.password) {
+    ElMessage.warning('請設定密碼');
+    return;
+  }
+  // 複製一份資料，避免直接修改原物件
+  const payload = { ...form.value };
+  if (isEdit.value && !payload.password) {
+    delete payload.password; // 編輯時若不填密碼，則不更新密碼
+  }
   if (isEdit.value) {
-    await api.put(`/admin/employees/${form.value.id}`, form.value);
+    await api.put(`/admin/employees/${form.value.id}`, payload);
     ElMessage.success('更新成功');
   } else {
-    await api.post('/admin/employees', form.value);
+    await api.post('/admin/employees', payload);
     ElMessage.success('新增成功');
   }
   dialogVisible.value = false;

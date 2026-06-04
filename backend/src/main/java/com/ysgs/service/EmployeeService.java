@@ -4,6 +4,7 @@ import com.ysgs.dto.EmployeeRequest;
 import com.ysgs.entity.Employee;
 import com.ysgs.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,9 @@ public class EmployeeService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<Employee> getAllEmployees(Integer tenantId) {
         return employeeRepository.findByTenantId(tenantId);
@@ -30,10 +34,14 @@ public class EmployeeService {
         Employee employee = new Employee();
         employee.setTenantId(tenantId);
         employee.setIdentityNumber(request.getIdentityNumber());
-        employee.setBirthDate(request.getBirthDate());
+        // employee.setBirthDate(request.getBirthDate());  // 移除生日设置
         employee.setName(request.getName());
         employee.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
         employee.setPermissions(request.getPermissions());
+        // 加密密码
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            employee.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        }
         return employeeRepository.save(employee);
     }
 
@@ -41,10 +49,14 @@ public class EmployeeService {
     public Employee updateEmployee(UUID id, EmployeeRequest request) {
         Employee employee = getEmployeeById(id);
         employee.setIdentityNumber(request.getIdentityNumber());
-        employee.setBirthDate(request.getBirthDate());
+        // employee.setBirthDate(request.getBirthDate());  // 移除生日更新
         employee.setName(request.getName());
         employee.setIsActive(request.getIsActive());
         employee.setPermissions(request.getPermissions());
+        // 如果提供了新密码，则更新哈希
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            employee.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        }
         return employeeRepository.save(employee);
     }
 

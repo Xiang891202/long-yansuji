@@ -10,6 +10,7 @@ public class LoginRequest {
     private LocalDate birthDate;
     private String email;
     private String phone;
+    private String password;  // 新增
 
     // 手動 getter/setter（由於 Lombok 可能失效，加入這些方法確保編譯通過）
     public Integer getTenantId() { return tenantId; }
