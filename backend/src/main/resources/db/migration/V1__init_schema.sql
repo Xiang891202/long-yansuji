@@ -63,13 +63,14 @@ CREATE TABLE IF NOT EXISTS inv_safe_stocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES inv_products(id) ON DELETE CASCADE,
-    day_of_week SMALLINT CHECK (day_of_week BETWEEN 1 AND 7),
+    day_of_week INTEGER CHECK (day_of_week BETWEEN 1 AND 7), -- 💡 將 SMALLINT 改為 INTEGER
     safe_quantity INTEGER CHECK (safe_quantity >= 0),
     version INTEGER DEFAULT 1,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE (product_id, day_of_week)
 );
+
 
 -- 庫存回報記錄表
 CREATE TABLE IF NOT EXISTS inv_inventory_reports (
