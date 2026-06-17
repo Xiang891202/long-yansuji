@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS idempotency_records (
     key VARCHAR(255) PRIMARY KEY,
     response_data TEXT,
     supplier_text TEXT, -- 補上這行
+    vegetable_text TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
