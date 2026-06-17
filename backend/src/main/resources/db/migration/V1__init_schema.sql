@@ -77,11 +77,12 @@ CREATE TABLE IF NOT EXISTS inv_inventory_reports (
     tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     product_id UUID NOT NULL REFERENCES inv_products(id) ON DELETE CASCADE,
     employee_id UUID REFERENCES employees(id),
-    day_of_week SMALLINT NOT NULL,
+    day_of_week INTEGER NOT NULL, -- 💡 這裡將 SMALLINT 改為 INTEGER
     current_quantity INTEGER CHECK (current_quantity >= 0),
     reported_by VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
 
 -- 叫貨單主表
 CREATE TABLE IF NOT EXISTS inv_replenishments (
