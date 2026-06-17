@@ -1,6 +1,7 @@
 package com.ysgs.config;
 
-import com.ysgs.security.JwtAuthenticationFilter;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.ysgs.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -52,7 +53,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
             "http://localhost:5173",
-            "https://long-yansuji-personal.vercel.app"   // 替换为你的实际 Vercel 域名
+            "https://long-yansuji-personal.vercel.app",   // 替换为你的实际 Vercel 域名
+            "https://long-yansuji.vercel.app"
         ));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
