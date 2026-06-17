@@ -14,8 +14,8 @@ export function useLogin(loginType) {
   const form = reactive({
     tenantId: 2,
     ...(loginType === 'admin'
-      ? { email: 'boss@ysgs.com', password: '' }
-      : { identityNumber: 'B987654321', password: '' })
+      ? { email: '', password: '' }
+      : { identityNumber: '', password: '' })
   });
 
   const errorMsg = ref('');
